@@ -4,687 +4,743 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HAKAI — Windows Optimization Playbook</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+JP:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  
-  :root {
-    --red: #c1121f;
-    --red-bright: #ff0033;
-    --red-dark: #7a0a12;
-    --black: #080808;
-    --dark: #0f0f0f;
-    --card: #141414;
-    --gold: #d4af37;
-    --white: #f5f5f5;
-    --gray: #888;
-  }
-  
-  html { scroll-behavior: smooth; }
-  
-  body {
-    background: var(--black);
-    color: var(--white);
-    font-family: 'Orbitron', sans-serif;
-    overflow-x: hidden;
-    line-height: 1.6;
-  }
-  
-  #particles {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: -1;
-    background: radial-gradient(ellipse at top, #1a0000 0%, #000 80%);
-  }
-  
-  /* Scanline overlay */
-  body::after {
-    content: '';
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: repeating-linear-gradient(0deg, rgba(0,0,0,0.15), rgba(0,0,0,0.15) 1px, transparent 1px, transparent 2px);
-    pointer-events: none;
-    z-index: 9999;
-    opacity: 0.3;
-  }
-  
-  /* Header */
-  header {
-    position: fixed;
-    top: 0; width: 100%;
-    padding: 18px 60px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: rgba(8,8,8,0.9);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(193,18,31,0.3);
-    z-index: 100;
-    transition: all 0.3s;
-  }
-  
-  .logo {
-    font-size: 1.6rem;
-    font-weight: 900;
-    color: var(--red);
-    text-shadow: 0 0 20px var(--red-bright);
-    letter-spacing: 4px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  
-  .logo .jp {
-    font-family: 'Noto Sans JP', sans-serif;
-    font-size: 0.75rem;
-    color: var(--gold);
-    letter-spacing: 3px;
-  }
-  
-  nav { display: flex; gap: 30px; }
-  
-  nav a {
-    color: var(--white);
-    text-decoration: none;
-    font-size: 0.8rem;
-    letter-spacing: 2px;
-    transition: all 0.3s;
-    position: relative;
-    padding: 5px 0;
-  }
-  
-  nav a::after {
-    content: '';
-    position: absolute;
-    bottom: 0; left: 0;
-    width: 0; height: 2px;
-    background: var(--red);
-    transition: width 0.3s;
-  }
-  
-  nav a:hover { color: var(--red); }
-  nav a:hover::after { width: 100%; }
-  
-  /* Hero */
-  .hero {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    padding: 120px 20px 60px;
-    position: relative;
-  }
-  
-  .hero .tagline {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.85rem;
-    color: var(--red);
-    letter-spacing: 6px;
-    margin-bottom: 30px;
-    border: 1px solid rgba(193,18,31,0.4);
-    padding: 8px 20px;
-    background: rgba(193,18,31,0.05);
-  }
-  
-  .hero h1 {
-    font-size: 9rem;
-    font-weight: 900;
-    color: var(--white);
-    letter-spacing: 12px;
-    text-shadow: 0 0 30px var(--red-bright), 0 0 80px var(--red);
-    margin-bottom: 15px;
-    animation: pulse 4s infinite;
-    line-height: 1;
-  }
-  
-  @keyframes pulse {
-    0%, 100% { text-shadow: 0 0 30px var(--red-bright), 0 0 80px var(--red); }
-    50% { text-shadow: 0 0 50px var(--red-bright), 0 0 120px var(--red); }
-  }
-  
-  .hero .jp-title {
-    font-family: 'Noto Sans JP', sans-serif;
-    font-size: 1.5rem;
-    color: var(--gold);
-    letter-spacing: 10px;
-    margin-bottom: 40px;
-  }
-  
-  .hero p {
-    font-size: 1rem;
-    color: var(--gray);
-    max-width: 700px;
-    margin-bottom: 50px;
-    line-height: 1.9;
-  }
-  
-  .hero-buttons {
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  
-  .btn {
-    padding: 15px 40px;
-    background: transparent;
-    border: 2px solid var(--red);
-    color: var(--red);
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.9rem;
-    letter-spacing: 3px;
-    cursor: pointer;
-    transition: all 0.3s;
-    text-decoration: none;
-    display: inline-block;
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .btn::before {
-    content: '';
-    position: absolute;
-    top: 50%; left: 50%;
-    width: 0; height: 0;
-    background: var(--red);
-    transition: all 0.4s;
-    transform: translate(-50%, -50%);
-    border-radius: 50%;
-    z-index: -1;
-  }
-  
-  .btn:hover::before { width: 300px; height: 300px; }
-  .btn:hover { color: var(--black); box-shadow: 0 0 30px var(--red-bright); }
-  
-  .btn.secondary { border-color: var(--gold); color: var(--gold); }
-  .btn.secondary::before { background: var(--gold); }
-  .btn.secondary:hover { color: var(--black); box-shadow: 0 0 30px var(--gold); }
-  
-  /* Stats bar */
-  .stats {
-    display: flex;
-    justify-content: center;
-    gap: 80px;
-    flex-wrap: wrap;
-    padding: 60px;
-    background: rgba(15,15,15,0.6);
-    border-top: 1px solid rgba(193,18,31,0.2);
-    border-bottom: 1px solid rgba(193,18,31,0.2);
-  }
-  
-  .stat { text-align: center; }
-  
-  .stat .num {
-    font-size: 3rem;
-    font-weight: 900;
-    color: var(--red);
-    text-shadow: 0 0 20px var(--red-bright);
-  }
-  
-  .stat .label {
-    font-size: 0.75rem;
-    color: var(--gray);
-    letter-spacing: 3px;
-    margin-top: 5px;
-  }
-  
-  /* Sections */
-  section {
-    padding: 100px 60px;
-    position: relative;
-  }
-  
-  .section-title {
-    font-size: 2.5rem;
-    font-weight: 900;
-    color: var(--white);
-    letter-spacing: 5px;
-    margin-bottom: 15px;
-    text-align: center;
-  }
-  
-  .section-title::after {
-    content: '';
-    display: block;
-    width: 80px;
-    height: 3px;
-    background: var(--red);
-    margin: 20px auto 0;
-    box-shadow: 0 0 20px var(--red-bright);
-  }
-  
-  .section-sub {
-    font-family: 'Noto Sans JP', sans-serif;
-    color: var(--gold);
-    text-align: center;
-    margin-bottom: 60px;
-    letter-spacing: 4px;
-    font-size: 0.9rem;
-  }
-  
-  .section-desc {
-    text-align: center;
-    max-width: 700px;
-    margin: 0 auto 60px;
-    color: var(--gray);
-    line-height: 1.9;
-  }
-  
-  /* Grid */
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 25px;
-    max-width: 1300px;
-    margin: 0 auto;
-  }
-  
-  .card {
-    background: var(--card);
-    border: 1px solid rgba(193,18,31,0.2);
-    padding: 40px 30px;
-    transition: all 0.3s;
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: -100%;
-    width: 100%; height: 2px;
-    background: linear-gradient(90deg, transparent, var(--red), transparent);
-    transition: left 0.6s;
-  }
-  
-  .card:hover::before { left: 100%; }
-  
-  .card:hover {
-    border-color: var(--red);
-    transform: translateY(-5px);
-    box-shadow: 0 15px 40px rgba(193,18,31,0.25);
-  }
-  
-  .card .icon {
-    font-size: 2.2rem;
-    color: var(--red);
-    margin-bottom: 20px;
-    display: block;
-  }
-  
-  .card h3 {
-    font-size: 1.1rem;
-    letter-spacing: 2px;
-    margin-bottom: 12px;
-    color: var(--white);
-  }
-  
-  .card p {
-    color: var(--gray);
-    font-size: 0.85rem;
-    line-height: 1.8;
-  }
-  
-  .card .jp-tag {
-    position: absolute;
-    top: 20px; right: 20px;
-    font-family: 'Noto Sans JP', sans-serif;
-    font-size: 0.7rem;
-    color: var(--gold);
-    opacity: 0.5;
-  }
-  
-  /* Optimizations list */
-  .opt-list {
-    max-width: 1000px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
-  }
-  
-  .opt-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 15px;
-    padding: 20px;
-    background: rgba(20,20,20,0.5);
-    border-left: 3px solid var(--red);
-    transition: all 0.3s;
-  }
-  
-  .opt-item:hover {
-    background: rgba(193,18,31,0.08);
-    transform: translateX(5px);
-  }
-  
-  .opt-item .check {
-    color: var(--red);
-    font-size: 1.2rem;
-    font-weight: bold;
-  }
-  
-  .opt-item .text {
-    font-size: 0.85rem;
-    color: var(--white);
-  }
-  
-  .opt-item .text small {
-    display: block;
-    color: var(--gray);
-    font-size: 0.75rem;
-    margin-top: 3px;
-  }
-  
-  /* Apps */
-  .apps-list {
-    max-width: 1000px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 15px;
-  }
-  
-  .app-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 18px 25px;
-    background: rgba(20,20,20,0.6);
-    border: 1px solid rgba(193,18,31,0.2);
-    transition: all 0.3s;
-    text-decoration: none;
-    color: var(--white);
-  }
-  
-  .app-item:hover {
-    border-color: var(--red);
-    background: rgba(193,18,31,0.08);
-    transform: translateY(-2px);
-  }
-  
-  .app-item .name {
-    font-size: 0.9rem;
-    letter-spacing: 1px;
-  }
-  
-  .app-item .jp-name {
-    font-family: 'Noto Sans JP', sans-serif;
-    font-size: 0.7rem;
-    color: var(--gold);
-    margin-top: 3px;
-    display: block;
-  }
-  
-  .app-item .arrow {
-    color: var(--red);
-    font-size: 1.2rem;
-    transition: transform 0.3s;
-  }
-  
-  .app-item:hover .arrow { transform: translateX(5px); }
-  
-  /* Terminal block */
-  .terminal {
-    max-width: 800px;
-    margin: 0 auto;
-    background: #0a0a0a;
-    border: 1px solid rgba(193,18,31,0.4);
-    border-radius: 6px;
-    overflow: hidden;
-    box-shadow: 0 20px 60px rgba(193,18,31,0.2);
-  }
-  
-  .terminal-header {
-    background: #1a1a1a;
-    padding: 12px 20px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    border-bottom: 1px solid rgba(193,18,31,0.2);
-  }
-  
-  .terminal-header .dot {
-    width: 12px; height: 12px;
-    border-radius: 50%;
-  }
-  
-  .terminal-header .dot.red { background: #ff5f56; }
-  .terminal-header .dot.yellow { background: #ffbd2e; }
-  .terminal-header .dot.green { background: #27c93f; }
-  
-  .terminal-header .title {
-    margin-left: auto;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.75rem;
-    color: var(--gray);
-  }
-  
-  .terminal-body {
-    padding: 25px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.85rem;
-    line-height: 1.8;
-    color: #ccc;
-    overflow-x: auto;
-  }
-  
-  .terminal-body .prompt { color: var(--red); }
-  .terminal-body .cmd { color: var(--white); }
-  .terminal-body .output { color: var(--gray); }
-  .terminal-body .success { color: #27c93f; }
-  
-  /* FAQ */
-  .faq {
-    max-width: 800px;
-    margin: 0 auto;
-  }
-  
-  .faq-item {
-    background: var(--card);
-    border: 1px solid rgba(193,18,31,0.2);
-    margin-bottom: 15px;
-    overflow: hidden;
-    transition: all 0.3s;
-  }
-  
-  .faq-question {
-    padding: 20px 25px;
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.9rem;
-    letter-spacing: 1px;
-    transition: background 0.3s;
-  }
-  
-  .faq-question:hover { background: rgba(193,18,31,0.05); }
-  
-  .faq-question .plus {
-    color: var(--red);
-    font-size: 1.3rem;
-    transition: transform 0.3s;
-  }
-  
-  .faq-item.open .faq-question .plus { transform: rotate(45deg); }
-  
-  .faq-answer {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.4s, padding 0.3s;
-    padding: 0 25px;
-    color: var(--gray);
-    font-size: 0.85rem;
-    line-height: 1.8;
-  }
-  
-  .faq-item.open .faq-answer {
-    max-height: 300px;
-    padding: 0 25px 25px;
-  }
-  
-  /* Requirements */
-  .req-grid {
-    max-width: 900px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-  }
-  
-  .req-item {
-    text-align: center;
-    padding: 30px 20px;
-    background: var(--card);
-    border: 1px solid rgba(193,18,31,0.2);
-  }
-  
-  .req-item .req-icon {
-    font-size: 2rem;
-    color: var(--red);
-    margin-bottom: 15px;
-  }
-  
-  .req-item h4 {
-    font-size: 0.85rem;
-    letter-spacing: 2px;
-    margin-bottom: 8px;
-  }
-  
-  .req-item p {
-    font-size: 0.75rem;
-    color: var(--gray);
-  }
-  
-  /* Changelog */
-  .changelog {
-    max-width: 800px;
-    margin: 0 auto;
-  }
-  
-  .log-entry {
-    display: flex;
-    gap: 25px;
-    padding: 25px 0;
-    border-bottom: 1px solid rgba(193,18,31,0.15);
-  }
-  
-  .log-version {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--red);
-    min-width: 100px;
-    font-family: 'JetBrains Mono', monospace;
-  }
-  
-  .log-content h4 {
-    font-size: 0.9rem;
-    margin-bottom: 8px;
-    letter-spacing: 1px;
-  }
-  
-  .log-content ul {
-    list-style: none;
-    padding: 0;
-  }
-  
-  .log-content li {
-    font-size: 0.8rem;
-    color: var(--gray);
-    padding: 4px 0;
-    padding-left: 18px;
-    position: relative;
-  }
-  
-  .log-content li::before {
-    content: '▸';
-    position: absolute;
-    left: 0;
-    color: var(--red);
-  }
-  
-  /* CTA */
-  .cta {
-    text-align: center;
-    padding: 100px 60px;
-    background: linear-gradient(180deg, transparent, rgba(193,18,31,0.05), transparent);
-  }
-  
-  .cta h2 {
-    font-size: 2.5rem;
-    letter-spacing: 6px;
-    margin-bottom: 20px;
-    color: var(--white);
-  }
-  
-  .cta p {
-    color: var(--gray);
-    max-width: 600px;
-    margin: 0 auto 40px;
-    line-height: 1.9;
-  }
-  
-  /* Footer */
-  footer {
-    padding: 60px;
-    text-align: center;
-    border-top: 1px solid rgba(193,18,31,0.3);
-    color: #555;
-    font-size: 0.8rem;
-    letter-spacing: 2px;
-  }
-  
-  footer .jp {
-    font-family: 'Noto Sans JP', sans-serif;
-    color: var(--gold);
-    display: block;
-    margin-top: 15px;
-    font-size: 0.9rem;
-    letter-spacing: 4px;
-  }
-  
-  footer .links {
-    margin-bottom: 25px;
-    display: flex;
-    justify-content: center;
-    gap: 30px;
-    flex-wrap: wrap;
-  }
-  
-  footer .links a {
-    color: var(--gray);
-    text-decoration: none;
-    font-size: 0.8rem;
-    transition: color 0.3s;
-  }
-  
-  footer .links a:hover { color: var(--red); }
-  
-  /* Responsive */
-  @media (max-width: 768px) {
-    header { padding: 15px 20px; }
-    nav { gap: 15px; }
-    nav a { font-size: 0.7rem; }
-    .hero h1 { font-size: 4rem; letter-spacing: 6px; }
-    .hero .jp-title { font-size: 1rem; letter-spacing: 5px; }
-    section { padding: 60px 20px; }
-    .section-title { font-size: 1.8rem; }
-    .stats { gap: 40px; padding: 40px 20px; }
-    .stat .num { font-size: 2rem; }
-    .log-entry { flex-direction: column; gap: 10px; }
-  }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --red: #c1121f;
+  --red-bright: #ff0033;
+  --gold: #d4af37;
+  --black: #080808;
+  --card: #141414;
+  --white: #f5f5f5;
+  --gray: #888;
+  --discord: #5865f2;
+  --instagram: #e1306c;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--black);
+  color: var(--white);
+  font-family: 'Orbitron', sans-serif;
+  overflow-x: hidden;
+  line-height: 1.6;
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M4 2 L4 26 L10 20 L14 30 L18 28 L14 18 L22 18 Z' fill='%23c1121f' stroke='%23ffffff' stroke-width='1.2'/%3E%3C/svg%3E") 4 2, auto;
+}
+
+a, button, .btn, .app-item, nav a {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M4 2 L4 26 L10 20 L14 30 L18 28 L14 18 L22 18 Z' fill='%23ff0033' stroke='%23ffffff' stroke-width='1.5'/%3E%3C/svg%3E") 4 2, pointer;
+}
+
+#bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(ellipse at top, #1a0000 0%, #000 70%),
+    linear-gradient(180deg, transparent 0%, rgba(193,18,31,0.03) 50%, transparent 100%);
+}
+
+header {
+  position: fixed;
+  top: 0; width: 100%;
+  padding: 16px 60px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(8,8,8,0.92);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(193,18,31,0.25);
+  z-index: 100;
+  transition: padding 0.3s, background 0.3s;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--red);
+  letter-spacing: 5px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: text-shadow 0.3s;
+}
+
+.logo:hover { text-shadow: 0 0 25px var(--red-bright); }
+
+.logo .jp {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 0.7rem;
+  color: var(--gold);
+  letter-spacing: 3px;
+}
+
+nav { display: flex; gap: 28px; }
+
+nav a {
+  color: var(--white);
+  text-decoration: none;
+  font-size: 0.75rem;
+  letter-spacing: 2px;
+  transition: color 0.25s;
+  position: relative;
+  padding: 4px 0;
+}
+
+nav a::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 0; height: 2px;
+  background: var(--red);
+  transition: width 0.25s;
+}
+
+nav a:hover { color: var(--red); }
+nav a:hover::after { width: 100%; }
+
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 120px 20px 60px;
+}
+
+.hero .tagline {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  color: var(--red);
+  letter-spacing: 6px;
+  margin-bottom: 30px;
+  border: 1px solid rgba(193,18,31,0.35);
+  padding: 8px 20px;
+  animation: fadeIn 1s ease;
+}
+
+.hero h1 {
+  font-size: 8.5rem;
+  font-weight: 900;
+  color: var(--white);
+  letter-spacing: 14px;
+  text-shadow: 0 0 40px var(--red-bright), 0 0 90px var(--red);
+  margin-bottom: 15px;
+  animation: fadeIn 1.2s ease, glow 4s ease-in-out infinite;
+  line-height: 1;
+}
+
+.hero .jp-title {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 1.3rem;
+  color: var(--gold);
+  letter-spacing: 10px;
+  margin-bottom: 40px;
+  animation: fadeIn 1.4s ease;
+}
+
+.hero p {
+  font-size: 1rem;
+  color: var(--gray);
+  max-width: 700px;
+  margin-bottom: 50px;
+  line-height: 1.9;
+  animation: fadeIn 1.6s ease;
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+  animation: fadeIn 1.8s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes glow {
+  0%, 100% { text-shadow: 0 0 40px var(--red-bright), 0 0 90px var(--red); }
+  50% { text-shadow: 0 0 60px var(--red-bright), 0 0 130px var(--red); }
+}
+
+.btn {
+  padding: 14px 38px;
+  background: transparent;
+  border: 2px solid var(--red);
+  color: var(--red);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.85rem;
+  letter-spacing: 3px;
+  transition: all 0.3s;
+  text-decoration: none;
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn span { position: relative; z-index: 1; }
+
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 0; height: 0;
+  background: var(--red);
+  transition: width 0.4s, height 0.4s;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  z-index: 0;
+}
+
+.btn:hover::before { width: 300px; height: 300px; }
+.btn:hover { color: var(--black); box-shadow: 0 0 30px var(--red-bright); }
+
+.btn.secondary { border-color: var(--gold); color: var(--gold); }
+.btn.secondary::before { background: var(--gold); }
+.btn.secondary:hover { color: var(--black); box-shadow: 0 0 30px var(--gold); }
+
+.stats {
+  display: flex;
+  justify-content: center;
+  gap: 70px;
+  flex-wrap: wrap;
+  padding: 55px;
+  background: rgba(15,15,15,0.55);
+  border-top: 1px solid rgba(193,18,31,0.2);
+  border-bottom: 1px solid rgba(193,18,31,0.2);
+}
+
+.stat { text-align: center; opacity: 0; animation: fadeIn 0.8s ease forwards; }
+.stat:nth-child(1) { animation-delay: 0.15s; }
+.stat:nth-child(2) { animation-delay: 0.3s; }
+.stat:nth-child(3) { animation-delay: 0.45s; }
+.stat:nth-child(4) { animation-delay: 0.6s; }
+
+.stat .num {
+  font-size: 2.8rem;
+  font-weight: 900;
+  color: var(--red);
+  text-shadow: 0 0 18px var(--red-bright);
+}
+
+.stat .label {
+  font-size: 0.72rem;
+  color: var(--gray);
+  letter-spacing: 3px;
+  margin-top: 5px;
+}
+
+section {
+  padding: 100px 60px;
+  position: relative;
+}
+
+.section-title {
+  font-size: 2.4rem;
+  font-weight: 900;
+  color: var(--white);
+  letter-spacing: 5px;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.section-title::after {
+  content: '';
+  display: block;
+  width: 70px;
+  height: 3px;
+  background: var(--red);
+  margin: 18px auto 0;
+  box-shadow: 0 0 18px var(--red-bright);
+}
+
+.section-sub {
+  font-family: 'Noto Sans JP', sans-serif;
+  color: var(--gold);
+  text-align: center;
+  margin-bottom: 55px;
+  letter-spacing: 4px;
+  font-size: 0.85rem;
+}
+
+.section-desc {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto 55px;
+  color: var(--gray);
+  line-height: 1.9;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 22px;
+  max-width: 1250px;
+  margin: 0 auto;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid rgba(193,18,31,0.2);
+  padding: 35px 28px;
+  transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+  position: relative;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(25px);
+}
+
+.card.visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--red), transparent);
+  transition: left 0.5s;
+}
+
+.card:hover::before { left: 100%; }
+
+.card:hover {
+  border-color: var(--red);
+  transform: translateY(-6px);
+  box-shadow: 0 15px 40px rgba(193,18,31,0.25);
+}
+
+.card .icon {
+  font-size: 2rem;
+  color: var(--red);
+  margin-bottom: 18px;
+  display: block;
+  transition: transform 0.3s;
+}
+
+.card:hover .icon { transform: scale(1.15); }
+
+.card h3 {
+  font-size: 1rem;
+  letter-spacing: 2px;
+  margin-bottom: 12px;
+  color: var(--white);
+}
+
+.card p {
+  color: var(--gray);
+  font-size: 0.83rem;
+  line-height: 1.8;
+}
+
+.card .jp-tag {
+  position: absolute;
+  top: 18px; right: 18px;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 0.68rem;
+  color: var(--gold);
+  opacity: 0.45;
+  transition: opacity 0.3s;
+}
+
+.card:hover .jp-tag { opacity: 1; }
+
+.apps-list {
+  max-width: 900px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px;
+}
+
+.app-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 28px;
+  background: rgba(20,20,20,0.6);
+  border: 1px solid rgba(193,18,31,0.2);
+  transition: transform 0.3s, border-color 0.3s, background 0.3s;
+  text-decoration: none;
+  color: var(--white);
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.app-item.visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.app-item:hover {
+  border-color: var(--red);
+  background: rgba(193,18,31,0.08);
+  transform: translateY(-3px);
+}
+
+.app-item .name {
+  font-size: 0.92rem;
+  letter-spacing: 1px;
+  font-weight: 700;
+}
+
+.app-item .jp-name {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 0.68rem;
+  color: var(--gold);
+  margin-top: 4px;
+  display: block;
+}
+
+.app-item .arrow {
+  color: var(--red);
+  font-size: 1.4rem;
+  transition: transform 0.3s;
+}
+
+.app-item:hover .arrow { transform: translateX(6px); }
+
+.community-section {
+  text-align: center;
+  padding: 100px 60px;
+  background: linear-gradient(180deg, transparent, rgba(88,101,242,0.06), transparent);
+}
+
+.community-grid {
+  max-width: 900px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 25px;
+}
+
+.community-card {
+  padding: 45px 30px;
+  background: var(--card);
+  border: 1px solid rgba(88,101,242,0.3);
+  transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+  opacity: 0;
+  transform: translateY(25px);
+  text-align: center;
+}
+
+.community-card.visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.community-card.discord:hover {
+  border-color: var(--discord);
+  box-shadow: 0 15px 45px rgba(88,101,242,0.25);
+  transform: translateY(-6px);
+}
+
+.community-card.instagram:hover {
+  border-color: var(--instagram);
+  box-shadow: 0 15px 45px rgba(225,48,108,0.25);
+  transform: translateY(-6px);
+}
+
+.community-card .logo {
+  font-size: 3.2rem;
+  margin-bottom: 20px;
+  display: block;
+}
+
+.community-card.discord .logo { color: var(--discord); }
+.community-card.instagram .logo { color: var(--instagram); }
+
+.community-card h3 {
+  font-size: 1.3rem;
+  letter-spacing: 3px;
+  margin-bottom: 12px;
+  color: var(--white);
+}
+
+.community-card p {
+  color: var(--gray);
+  margin-bottom: 25px;
+  line-height: 1.8;
+  font-size: 0.88rem;
+}
+
+.community-card .handle {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--gold);
+  font-size: 0.85rem;
+  margin-bottom: 22px;
+  display: block;
+}
+
+.community-card .btn-community {
+  padding: 13px 34px;
+  border: none;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.82rem;
+  letter-spacing: 3px;
+  transition: transform 0.3s, box-shadow 0.3s;
+  text-decoration: none;
+  display: inline-block;
+  color: var(--white);
+}
+
+.community-card.discord .btn-community { background: var(--discord); }
+.community-card.discord .btn-community:hover {
+  background: #4752c4;
+  box-shadow: 0 0 25px rgba(88,101,242,0.6);
+  transform: translateY(-3px);
+}
+
+.community-card.instagram .btn-community {
+  background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+}
+.community-card.instagram .btn-community:hover {
+  box-shadow: 0 0 25px rgba(225,48,108,0.6);
+  transform: translateY(-3px);
+}
+
+.terminal {
+  max-width: 850px;
+  margin: 0 auto;
+  background: #0a0a0a;
+  border: 1px solid rgba(193,18,31,0.4);
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 15px 50px rgba(193,18,31,0.15);
+  opacity: 0;
+  transform: translateY(25px);
+}
+
+.terminal.visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.terminal-header {
+  background: #1a1a1a;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid rgba(193,18,31,0.2);
+}
+
+.terminal-header .dot {
+  width: 11px; height: 11px;
+  border-radius: 50%;
+}
+
+.terminal-header .dot.red { background: #ff5f56; }
+.terminal-header .dot.yellow { background: #ffbd2e; }
+.terminal-header .dot.green { background: #27c93f; }
+
+.terminal-header .title {
+  margin-left: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--gray);
+}
+
+.terminal-body {
+  padding: 25px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  line-height: 2;
+  color: #ccc;
+  overflow-x: auto;
+  min-height: 300px;
+}
+
+.terminal-body .line {
+  opacity: 0;
+  animation: fadeInLine 0.4s ease forwards;
+}
+
+.terminal-body .line:nth-child(1) { animation-delay: 0.4s; }
+.terminal-body .line:nth-child(2) { animation-delay: 1s; }
+.terminal-body .line:nth-child(3) { animation-delay: 1.6s; }
+.terminal-body .line:nth-child(4) { animation-delay: 2.2s; }
+.terminal-body .line:nth-child(5) { animation-delay: 2.8s; }
+.terminal-body .line:nth-child(6) { animation-delay: 3.4s; }
+.terminal-body .line:nth-child(7) { animation-delay: 4s; }
+.terminal-body .line:nth-child(8) { animation-delay: 4.5s; }
+.terminal-body .line:nth-child(9) { animation-delay: 5s; }
+.terminal-body .line:nth-child(10) { animation-delay: 5.5s; }
+.terminal-body .line:nth-child(11) { animation-delay: 6s; }
+.terminal-body .line:nth-child(12) { animation-delay: 6.5s; }
+.terminal-body .line:nth-child(13) { animation-delay: 7s; }
+.terminal-body .line:nth-child(14) { animation-delay: 7.5s; }
+
+@keyframes fadeInLine {
+  from { opacity: 0; transform: translateX(-8px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.terminal-body .prompt { color: var(--red); }
+.terminal-body .cmd { color: var(--white); }
+.terminal-body .output { color: var(--gray); }
+.terminal-body .success { color: #27c93f; }
+.terminal-body .warning { color: #ffbd2e; }
+.terminal-body .info { color: #00bfff; }
+
+.changelog {
+  max-width: 850px;
+  margin: 0 auto;
+}
+
+.log-entry {
+  display: flex;
+  gap: 25px;
+  padding: 28px 0;
+  border-bottom: 1px solid rgba(193,18,31,0.15);
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.log-entry.visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.log-version {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--red);
+  min-width: 110px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.log-content h4 {
+  font-size: 0.9rem;
+  margin-bottom: 12px;
+  letter-spacing: 2px;
+  color: var(--white);
+}
+
+.log-content ul { list-style: none; padding: 0; }
+
+.log-content li {
+  font-size: 0.83rem;
+  color: var(--gray);
+  padding: 5px 0 5px 20px;
+  position: relative;
+  transition: color 0.25s;
+}
+
+.log-content li:hover { color: var(--white); }
+
+.log-content li::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  color: var(--red);
+}
+
+.cta {
+  text-align: center;
+  padding: 100px 60px;
+  background: linear-gradient(180deg, transparent, rgba(193,18,31,0.05), transparent);
+}
+
+.cta h2 {
+  font-size: 2.3rem;
+  letter-spacing: 6px;
+  margin-bottom: 20px;
+  color: var(--white);
+}
+
+.cta p {
+  color: var(--gray);
+  max-width: 600px;
+  margin: 0 auto 40px;
+  line-height: 1.9;
+}
+
+.coming-soon {
+  display: inline-block;
+  padding: 14px 38px;
+  border: 2px dashed var(--red);
+  color: var(--red);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.85rem;
+  letter-spacing: 3px;
+  animation: glow 3s ease-in-out infinite;
+  text-decoration: none;
+}
+
+.coming-soon:hover {
+  background: rgba(193,18,31,0.1);
+}
+
+footer {
+  padding: 55px;
+  text-align: center;
+  border-top: 1px solid rgba(193,18,31,0.3);
+  color: #555;
+  font-size: 0.78rem;
+  letter-spacing: 2px;
+}
+
+footer .jp {
+  font-family: 'Noto Sans JP', sans-serif;
+  color: var(--gold);
+  display: block;
+  margin-top: 15px;
+  font-size: 0.88rem;
+  letter-spacing: 4px;
+}
+
+footer .links {
+  margin-bottom: 22px;
+  display: flex;
+  justify-content: center;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+
+footer .links a {
+  color: var(--gray);
+  text-decoration: none;
+  font-size: 0.78rem;
+  transition: color 0.25s;
+}
+
+footer .links a:hover { color: var(--red); }
+
+@media (max-width: 768px) {
+  header { padding: 14px 18px; }
+  nav { gap: 12px; }
+  nav a { font-size: 0.65rem; letter-spacing: 1px; }
+  .hero h1 { font-size: 3.8rem; letter-spacing: 6px; }
+  .hero .jp-title { font-size: 0.95rem; letter-spacing: 5px; }
+  section { padding: 60px 18px; }
+  .section-title { font-size: 1.7rem; }
+  .stats { gap: 35px; padding: 35px 18px; }
+  .stat .num { font-size: 1.9rem; }
+  .log-entry { flex-direction: column; gap: 8px; }
+}
 </style>
 </head>
 <body>
 
-<canvas id="particles"></canvas>
+<div id="bg"></div>
 
-<!-- Header -->
 <header>
   <div class="logo">
     HAKAI
@@ -694,29 +750,27 @@
     <a href="#features">FEATURES</a>
     <a href="#optimizations">OPTIMIZATIONS</a>
     <a href="#apps">APPS</a>
-    <a href="#requirements">REQUIREMENTS</a>
-    <a href="#faq">FAQ</a>
+    <a href="#community">COMMUNITY</a>
+    <a href="#changelog">CHANGELOG</a>
     <a href="#download">DOWNLOAD</a>
   </nav>
 </header>
 
-<!-- Hero -->
 <section class="hero">
-  <div class="tagline">WINDOWS OPTIMIZATION PLAYBOOK · v1.0</div>
+  <div class="tagline">WINDOWS OPTIMIZATION PLAYBOOK</div>
   <h1>HAKAI</h1>
   <div class="jp-title">破壊 · 最適化 · システム</div>
   <p>A futuristic Windows Playbook built for performance, privacy, and aesthetics. Inspired by samurai and demon motifs. Stripped down to the essentials, optimized to the core, and designed to make your system lethal.</p>
   <div class="hero-buttons">
-    <a href="#download" class="btn">DOWNLOAD</a>
-    <a href="#features" class="btn secondary">LEARN MORE</a>
+    <a href="#download" class="btn"><span>DOWNLOAD</span></a>
+    <a href="#features" class="btn secondary"><span>LEARN MORE</span></a>
   </div>
 </section>
 
-<!-- Stats -->
 <div class="stats">
   <div class="stat">
-    <div class="num">90%</div>
-    <div class="label">BLOATWARE REMOVED</div>
+    <div class="num">100+</div>
+    <div class="label">TWEAKS APPLIED</div>
   </div>
   <div class="stat">
     <div class="num">2x</div>
@@ -732,7 +786,6 @@
   </div>
 </div>
 
-<!-- Features -->
 <section id="features">
   <h2 class="section-title">FEATURES</h2>
   <div class="section-sub">機能</div>
@@ -742,370 +795,272 @@
       <span class="jp-tag">性能</span>
       <div class="icon">⚔️</div>
       <h3>PERFORMANCE</h3>
-      <p>Aggressive tuning for gaming and productivity. Reduced latency, higher FPS, and optimized resource usage across the board.</p>
+      <p>Aggressive tuning for gaming and productivity. Reduced latency, higher FPS, and optimized resource usage.</p>
     </div>
     <div class="card">
       <span class="jp-tag">プライバシー</span>
       <div class="icon">🛡️</div>
       <h3>PRIVACY</h3>
-      <p>Telemetry disabled, tracking services removed, and unnecessary background processes eliminated. Your data stays yours.</p>
+      <p>Telemetry disabled, tracking services removed, and unnecessary background processes eliminated.</p>
     </div>
     <div class="card">
       <span class="jp-tag">美学</span>
       <div class="icon">👹</div>
       <h3>AESTHETICS</h3>
-      <p>Dark theme with red and gold accents, custom samurai wallpapers, and a minimal taskbar. Clean and aggressive.</p>
+      <p>Dark theme with red and gold accents, custom samurai wallpapers, and a clean minimal look.</p>
     </div>
     <div class="card">
       <span class="jp-tag">軽量</span>
       <div class="icon">⚡</div>
       <h3>LIGHTWEIGHT</h3>
-      <p>No bloat, no unnecessary services, no pre-installed apps. Just Windows running at its full potential.</p>
+      <p>No bloat, no unnecessary services, no pre-installed apps. Just Windows at full potential.</p>
     </div>
     <div class="card">
       <span class="jp-tag">電力</span>
       <div class="icon">🗡️</div>
       <h3>POWER PLAN</h3>
-      <p>High Performance power plan configured automatically. No manual setup required after installation.</p>
-    </div>
-    <div class="card">
-      <span class="jp-tag">タスクバー</span>
-      <div class="icon">🔥</div>
-      <h3>TASKBAR</h3>
-      <p>Compact taskbar with small icons. More screen real estate for what actually matters.</p>
+      <p>High Performance power plan configured automatically. Zero manual setup required.</p>
     </div>
     <div class="card">
       <span class="jp-tag">ネットワーク</span>
       <div class="icon">🌐</div>
       <h3>NETWORK</h3>
-      <p>Nagle's algorithm disabled, DNS optimized, and network stack tuned for lower latency in online games.</p>
+      <p>Nagle's algorithm disabled, DNS optimized, and network stack tuned for lower latency.</p>
     </div>
     <div class="card">
       <span class="jp-tag">サービス</span>
       <div class="icon">⚙️</div>
       <h3>SERVICES</h3>
-      <p>Over 50 unnecessary Windows services disabled, including telemetry, diagnostics, and tracking services.</p>
+      <p>Over 50 unnecessary Windows services disabled, including telemetry and diagnostics.</p>
     </div>
     <div class="card">
       <span class="jp-tag">更新</span>
       <div class="icon">🔄</div>
       <h3>UPDATES</h3>
-      <p>Windows Update controlled and deferred. No forced restarts, no surprise downloads, no interruptions.</p>
+      <p>Windows Update controlled and deferred. No forced restarts, no interruptions.</p>
     </div>
   </div>
 </section>
 
-<!-- Optimizations -->
 <section id="optimizations" style="background: rgba(10,10,10,0.5);">
   <h2 class="section-title">OPTIMIZATIONS</h2>
   <div class="section-sub">最適化</div>
   <p class="section-desc">Every tweak is carefully selected to improve performance without breaking compatibility.</p>
-  <div class="opt-list">
-    <div class="opt-item">
-      <span class="check">✓</span>
-      <div class="text">Disable Telemetry & Tracking<small>DiagTrack, WerSvc, and all CEIP services</small></div>
+  <div class="grid">
+    <div class="card">
+      <div class="icon">✓</div>
+      <h3>TELEMETRY OFF</h3>
+      <p>DiagTrack, WerSvc, CEIP and all tracking services completely disabled.</p>
     </div>
-    <div class="opt-item">
-      <span class="check">✓</span>
-      <div class="text">Optimize NTFS<small>Last access disabled, 8dot3 naming off</small></div>
+    <div class="card">
+      <div class="icon">✓</div>
+      <h3>NTFS OPTIMIZED</h3>
+      <p>Last access disabled and 8dot3 naming turned off for faster file operations.</p>
     </div>
-    <div class="opt-item">
-      <span class="check">✓</span>
-      <div class="text">Disable Memory Compression<small>Reduces CPU overhead in low-RAM systems</small></div>
+    <div class="card">
+      <div class="icon">✓</div>
+      <h3>MEMORY TWEAKS</h3>
+      <p>Memory compression disabled to reduce CPU overhead on low-RAM systems.</p>
     </div>
-    <div class="opt-item">
-      <span class="check">✓</span>
-      <div class="text">Reduce Input Lag<small>GameDVR off, fullscreen optimizations disabled</small></div>
+    <div class="card">
+      <div class="icon">✓</div>
+      <h3>INPUT LAG FIX</h3>
+      <p>GameDVR disabled and fullscreen optimizations removed for competitive gaming.</p>
     </div>
-    <div class="opt-item">
-      <span class="check">✓</span>
-      <div class="text">Network Stack Tuning<small>Nagle's algorithm disabled, TCP optimizations</small></div>
+    <div class="card">
+      <div class="icon">✓</div>
+      <h3>NETWORK TUNING</h3>
+      <p>Nagle's algorithm disabled and TCP stack optimized for lower ping.</p>
     </div>
-    <div class="opt-item">
-      <span class="check">✓</span>
-      <div class="text">Service Cleanup<small>Over 50 services disabled safely</small></div>
+    <div class="card">
+      <div class="icon">✓</div>
+      <h3>SERVICE CLEANUP</h3>
+      <p>Over 50 services disabled safely without breaking system functionality.</p>
     </div>
-    <div class="opt-item">
-      <span class="check">✓</span>
-      <div class="text">Power Plan Configuration<small>High Performance enabled by default</small></div>
+    <div class="card">
+      <div class="icon">✓</div>
+      <h3>POWER PLAN</h3>
+      <p>High Performance power plan enabled by default for maximum responsiveness.</p>
     </div>
-    <div class="opt-item">
-      <span class="check">✓</span>
-      <div class="text">Scheduled Tasks Disabled<small>Telemetry and diagnostic tasks removed</small></div>
+    <div class="card">
+      <div class="icon">✓</div>
+      <h3>SCHEDULED TASKS</h3>
+      <p>Telemetry and diagnostic scheduled tasks removed from Task Scheduler.</p>
     </div>
-    <div class="opt-item">
-      <span class="check">✓</span>
-      <div class="text">Bloatware Removal<small>Edge, OneDrive, Teams, Copilot, and more</small></div>
+    <div class="card">
+      <div class="icon">✓</div>
+      <h3>BLOATWARE REMOVAL</h3>
+      <p>Edge, OneDrive, Teams, Copilot, and other pre-installed apps removed.</p>
     </div>
-    <div class="opt-item">
-      <span class="check">✓</span>
-      <div class="text">DNS Optimization<small>Flush cache, faster resolution</small></div>
+    <div class="card">
+      <div class="icon">✓</div>
+      <h3>DNS OPTIMIZATION</h3>
+      <p>DNS cache flushed and resolver optimized for faster name resolution.</p>
     </div>
-    <div class="opt-item">
-      <span class="check">✓</span>
-      <div class="text">Boot Configuration<small>Legacy boot menu, last known good enabled</small></div>
+    <div class="card">
+      <div class="icon">✓</div>
+      <h3>BOOT CONFIG</h3>
+      <p>Legacy boot menu enabled and last known good configuration preserved.</p>
     </div>
-    <div class="opt-item">
-      <span class="check">✓</span>
-      <div class="text">Registry Tweaks<small>Explorer, context menu, notifications</small></div>
+    <div class="card">
+      <div class="icon">✓</div>
+      <h3>REGISTRY TWEAKS</h3>
+      <p>Explorer, context menu, notifications, and taskbar carefully tuned.</p>
     </div>
   </div>
 </section>
 
-<!-- Terminal -->
 <section>
   <h2 class="section-title">INSTALLATION</h2>
   <div class="section-sub">インストール</div>
-  <p class="section-desc">Simple, fast, and clean. Just a few commands and you're done.</p>
+  <p class="section-desc">Simple, fast, and clean. Drop the playbook into AME Wizard and let it work.</p>
   <div class="terminal">
     <div class="terminal-header">
       <div class="dot red"></div>
       <div class="dot yellow"></div>
       <div class="dot green"></div>
-      <div class="title">PowerShell — Administrator</div>
+      <div class="title">AME Wizard — Administrator</div>
     </div>
     <div class="terminal-body">
-      <div><span class="prompt">PS C:\&gt;</span> <span class="cmd">cd F:\Hakai</span></div>
-      <div><span class="prompt">PS F:\Hakai&gt;</span> <span class="cmd">.\Apply-Hakai.ps1</span></div>
-      <div class="output">Scanning system...</div>
-      <div class="output">Checking requirements...</div>
-      <div class="output">Applying optimizations...</div>
-      <div class="success">✓ Telemetry disabled</div>
-      <div class="success">✓ Services optimized</div>
-      <div class="success">✓ Registry tweaked</div>
-      <div class="success">✓ Power plan set</div>
-      <div class="success">✓ Bloatware removed</div>
-      <div class="output">Finalizing...</div>
-      <div class="success">✓ HAKAI applied successfully. Rebooting in 10 seconds.</div>
+      <div class="line"><span class="prompt">[AME]</span> <span class="output">Loading playbook...</span></div>
+      <div class="line"><span class="prompt">[AME]</span> <span class="cmd">HakaiPlaybook.apbx</span> <span class="output">detected</span></div>
+      <div class="line"><span class="prompt">[AME]</span> <span class="output">Verifying integrity...</span> <span class="success">OK</span></div>
+      <div class="line"><span class="prompt">[AME]</span> <span class="info">Windows detected</span></div>
+      <div class="line"><span class="prompt">[AME]</span> <span class="output">Checking requirements...</span> <span class="success">PASSED</span></div>
+      <div class="line"><span class="prompt">[HAKAI]</span> <span class="output">Initializing deployment...</span></div>
+      <div class="line"><span class="success">✓ Telemetry disabled</span></div>
+      <div class="line"><span class="success">✓ Services optimized (50+)</span></div>
+      <div class="line"><span class="success">✓ Registry tweaks applied</span></div>
+      <div class="line"><span class="success">✓ Power plan set to High Performance</span></div>
+      <div class="line"><span class="success">✓ Bloatware removed</span></div>
+      <div class="line"><span class="success">✓ Network stack tuned</span></div>
+      <div class="line"><span class="success">✓ Taskbar configured</span></div>
+      <div class="line"><span class="prompt">[HAKAI]</span> <span class="warning">System will reboot in 10 seconds...</span></div>
     </div>
   </div>
 </section>
 
-<!-- Apps -->
 <section id="apps" style="background: rgba(10,10,10,0.5);">
   <h2 class="section-title">RECOMMENDED APPS</h2>
   <div class="section-sub">アプリ</div>
-  <p class="section-desc">Curated applications that fit the Hakai philosophy. All installers are automated.</p>
+  <p class="section-desc">Curated applications that fit the Hakai philosophy.</p>
   <div class="apps-list">
     <a href="https://brave.com/download/" target="_blank" class="app-item">
-      <div><div class="name">Brave Browser</div><span class="jp-name">ブラウザ</span></div>
-      <div class="arrow">→</div>
-    </a>
-    <a href="https://www.capcut.com/download" target="_blank" class="app-item">
-      <div><div class="name">CapCut</div><span class="jp-name">動画編集</span></div>
-      <div class="arrow">→</div>
-    </a>
-    <a href="https://discord.com/download" target="_blank" class="app-item">
-      <div><div class="name">Discord</div><span class="jp-name">通話</span></div>
-      <div class="arrow">→</div>
-    </a>
-    <a href="https://www.spotify.com/download/" target="_blank" class="app-item">
-      <div><div class="name">Spotify</div><span class="jp-name">音楽</span></div>
-      <div class="arrow">→</div>
-    </a>
-    <a href="https://obsproject.com/download" target="_blank" class="app-item">
-      <div><div class="name">OBS Studio</div><span class="jp-name">録画</span></div>
-      <div class="arrow">→</div>
-    </a>
-    <a href="https://protonvpn.com/download" target="_blank" class="app-item">
-      <div><div class="name">ProtonVPN</div><span class="jp-name">VPN</span></div>
+      <div>
+        <div class="name">Brave Browser</div>
+        <span class="jp-name">ブラウザ</span>
+      </div>
       <div class="arrow">→</div>
     </a>
     <a href="https://www.7-zip.org/download.html" target="_blank" class="app-item">
-      <div><div class="name">7-Zip</div><span class="jp-name">圧縮</span></div>
+      <div>
+        <div class="name">7-Zip</div>
+        <span class="jp-name">圧縮</span>
+      </div>
       <div class="arrow">→</div>
     </a>
-    <a href="https://www.videolan.org/vlc/" target="_blank" class="app-item">
-      <div><div class="name">VLC Media Player</div><span class="jp-name">メディア</span></div>
+    <a href="https://obsproject.com/download" target="_blank" class="app-item">
+      <div>
+        <div class="name">OBS Studio</div>
+        <span class="jp-name">録画</span>
+      </div>
       <div class="arrow">→</div>
     </a>
   </div>
 </section>
 
-<!-- Requirements -->
-<section id="requirements">
-  <h2 class="section-title">REQUIREMENTS</h2>
-  <div class="section-sub">要件</div>
-  <div class="req-grid">
-    <div class="req-item">
-      <div class="req-icon">💻</div>
-      <h4>WINDOWS 10/11</h4>
-      <p>Build 19044+ or 22631+</p>
+<section id="community" class="community-section">
+  <h2 class="section-title">COMMUNITY</h2>
+  <div class="section-sub">コミュニティ</div>
+  <p class="section-desc">Join the Hakai community for support, updates, and to connect with other users.</p>
+  <div class="community-grid">
+    <div class="community-card discord">
+      <span class="logo">💬</span>
+      <h3>DISCORD</h3>
+      <p>Get support, share your setup, and stay updated with the latest Hakai news.</p>
+      <span class="handle">Contact: ethhyn</span>
+      <a href="https://discord.gg/cQS2yejHUe" target="_blank" class="btn-community">JOIN DISCORD</a>
     </div>
-    <div class="req-item">
-      <div class="req-icon">🧠</div>
-      <h4>4 GB RAM</h4>
-      <p>Minimum recommended</p>
-    </div>
-    <div class="req-item">
-      <div class="req-icon">💾</div>
-      <h4>20 GB FREE</h4>
-      <p>For installation</p>
-    </div>
-    <div class="req-item">
-      <div class="req-icon">🔌</div>
-      <h4>PLUGGED IN</h4>
-      <p>Laptop recommended</p>
+    <div class="community-card instagram">
+      <span class="logo">📸</span>
+      <h3>INSTAGRAM</h3>
+      <p>Follow for updates, previews, and behind-the-scenes content of Hakai.</p>
+      <span class="handle">@ethhy_n</span>
+      <a href="https://instagram.com/ethhy_n" target="_blank" class="btn-community">FOLLOW</a>
     </div>
   </div>
 </section>
 
-<!-- Changelog -->
-<section style="background: rgba(10,10,10,0.5);">
+<section id="changelog">
   <h2 class="section-title">CHANGELOG</h2>
   <div class="section-sub">変更履歴</div>
   <div class="changelog">
     <div class="log-entry">
-      <div class="log-version">v1.0</div>
+      <div class="log-version">LATEST</div>
       <div class="log-content">
-        <h4>INITIAL RELEASE</h4>
+        <h4>HAKAI PLAYBOOK</h4>
         <ul>
-          <li>First public release of Hakai Playbook</li>
-          <li>Custom samurai wallpaper included</li>
-          <li>Compact taskbar tweak added</li>
-          <li>Hakai desktop folder with curated apps</li>
+          <li>Custom samurai wallpaper integrated</li>
+          <li>Compact taskbar tweak applied</li>
+          <li>Hakai desktop folder with curated tools</li>
           <li>Network low-latency tweaks</li>
+          <li>Telemetry and tracking services disabled</li>
+          <li>Over 50 services safely optimized</li>
+          <li>High Performance power plan enabled</li>
+          <li>Bloatware removal (Edge, OneDrive, Teams, Copilot)</li>
+          <li>Registry tweaks for explorer and context menu</li>
+          <li>DNS cache flush and network stack reset</li>
+          <li>Ads, suggestions and notifications disabled</li>
         </ul>
       </div>
     </div>
     <div class="log-entry">
-      <div class="log-version">v0.9</div>
+      <div class="log-version">BETA</div>
       <div class="log-content">
-        <h4>BETA</h4>
+        <h4>INTERNAL TESTING</h4>
         <ul>
-          <li>Internal testing and bug fixes</li>
+          <li>Initial Playbook structure created</li>
           <li>Service optimization list finalized</li>
           <li>Power plan configuration added</li>
+          <li>Custom branding and wallpapers</li>
         </ul>
       </div>
     </div>
   </div>
 </section>
 
-<!-- FAQ -->
-<section id="faq">
-  <h2 class="section-title">FAQ</h2>
-  <div class="section-sub">よくある質問</div>
-  <div class="faq">
-    <div class="faq-item">
-      <div class="faq-question">
-        <span>Is Hakai free?</span>
-        <span class="plus">+</span>
-      </div>
-      <div class="faq-answer">Yes, Hakai is completely free and open source. You can download, modify, and redistribute it as you wish.</div>
-    </div>
-    <div class="faq-item">
-      <div class="faq-question">
-        <span>Will it break my system?</span>
-        <span class="plus">+</span>
-      </div>
-      <div class="faq-answer">No. Hakai is designed to be safe and reversible. It doesn't modify core system files, only applies tweaks and optimizations that can be reverted.</div>
-    </div>
-    <div class="faq-item">
-      <div class="faq-question">
-        <span>Does it work on Windows 11?</span>
-        <span class="plus">+</span>
-      </div>
-      <div class="faq-answer">Yes, Hakai supports both Windows 10 (build 19044+) and Windows 11 (build 22631+).</div>
-    </div>
-    <div class="faq-item">
-      <div class="faq-question">
-        <span>Can I customize it?</span>
-        <span class="plus">+</span>
-      </div>
-      <div class="faq-answer">Absolutely. Hakai is built to be customizable. You can edit the Playbook, add your own tweaks, change the wallpaper, and more.</div>
-    </div>
-    <div class="faq-item">
-      <div class="faq-question">
-        <span>Is it safe for gaming?</span>
-        <span class="plus">+</span>
-      </div>
-      <div class="faq-answer">Yes. Hakai includes specific optimizations for gaming: reduced input lag, network tuning, and power plan configuration.</div>
-    </div>
-    <div class="faq-item">
-      <div class="faq-question">
-        <span>How do I uninstall it?</span>
-        <span class="plus">+</span>
-      </div>
-      <div class="faq-answer">You can reinstall Windows or use the revert option in the AME Wizard. Hakai doesn't leave permanent changes that can't be undone.</div>
-    </div>
-  </div>
-</section>
-
-<!-- CTA -->
 <section class="cta" id="download">
   <h2>READY TO TRANSFORM YOUR WINDOWS?</h2>
-  <p>Download Hakai and experience a faster, cleaner, and more private Windows.</p>
-  <div class="hero-buttons">
-    <a href="https://github.com/tu-usuario/hakai/releases" target="_blank" class="btn">DOWNLOAD NOW</a>
-    <a href="https://github.com/tu-usuario/hakai" target="_blank" class="btn secondary">VIEW ON GITHUB</a>
-  </div>
+  <p>The Hakai Playbook is currently in development. A public release will be available soon. Join our Discord to get notified.</p>
+  <a href="https://discord.gg/cQS2yejHUe" target="_blank" class="coming-soon">RELEASE COMING SOON</a>
 </section>
 
-<!-- Footer -->
 <footer>
   <div class="links">
     <a href="#features">Features</a>
     <a href="#optimizations">Optimizations</a>
     <a href="#apps">Apps</a>
-    <a href="#faq">FAQ</a>
-    <a href="https://github.com/tu-usuario/hakai" target="_blank">GitHub</a>
+    <a href="#community">Community</a>
+    <a href="#changelog">Changelog</a>
   </div>
   HAKAI PLAYBOOK · 2026 · ALL RIGHTS RESERVED
   <span class="jp">破壊は創造の始まり</span>
 </footer>
 
 <script>
-// Particles
-const canvas = document.getElementById('particles');
-const ctx = canvas.getContext('2d');
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-const particles = [];
-for (let i = 0; i < 100; i++) {
-  particles.push({
-    x: Math.random() * canvas.width,
-    y: Math.random() * canvas.height,
-    size: Math.random() * 2 + 0.5,
-    speedX: Math.random() * 0.4 - 0.2,
-    speedY: Math.random() * 0.4 - 0.2,
-    color: Math.random() > 0.5 ? '#c1121f' : '#d4af37',
-    alpha: Math.random() * 0.5 + 0.2
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      observer.unobserve(entry.target);
+    }
   });
-}
+}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
 
-function animate() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  particles.forEach(p => {
-    ctx.fillStyle = p.color;
-    ctx.globalAlpha = p.alpha;
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-    ctx.fill();
-    p.x += p.speedX;
-    p.y += p.speedY;
-    if (p.x < 0 || p.x > canvas.width) p.speedX *= -1;
-    if (p.y < 0 || p.y > canvas.height) p.speedY *= -1;
-  });
-  requestAnimationFrame(animate);
-}
-animate();
-
-window.addEventListener('resize', () => {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+document.querySelectorAll('.card, .app-item, .log-entry, .terminal, .community-card').forEach(el => {
+  observer.observe(el);
 });
 
-// FAQ accordion
-document.querySelectorAll('.faq-question').forEach(q => {
-  q.addEventListener('click', () => {
-    const item = q.parentElement;
-    item.classList.toggle('open');
-  });
-});
-
-// Smooth scroll
 document.querySelectorAll('a[href^="#"]').forEach(a => {
   a.addEventListener('click', e => {
     e.preventDefault();
@@ -1114,17 +1069,16 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   });
 });
 
-// Header scroll effect
+const header = document.querySelector('header');
 window.addEventListener('scroll', () => {
-  const header = document.querySelector('header');
   if (window.scrollY > 50) {
     header.style.padding = '12px 60px';
-    header.style.background = 'rgba(8,8,8,0.95)';
+    header.style.background = 'rgba(8,8,8,0.96)';
   } else {
-    header.style.padding = '18px 60px';
-    header.style.background = 'rgba(8,8,8,0.9)';
+    header.style.padding = '16px 60px';
+    header.style.background = 'rgba(8,8,8,0.92)';
   }
-});
+}, { passive: true });
 </script>
 
 </body>
